@@ -1,0 +1,8 @@
+android {
+    ...
+    defaultConfig {
+        ...
+        versionCode 1  // Increment this with each release
+        versionName "1.0.0"  // App version (string)
+    }
+}
