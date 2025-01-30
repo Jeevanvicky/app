@@ -1,72 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:get/get.dart';
+import '../services/api_service.dart';
 
 class OtpScreen extends StatefulWidget {
+  const OtpScreen({super.key});
+
   @override
   _OtpScreenState createState() => _OtpScreenState();
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  TextEditingController _otpController = TextEditingController();
-  String? phoneNumber;
+  final TextEditingController otpController = TextEditingController();
+  final ApiService apiService = ApiService();
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    phoneNumber = ModalRoute.of(context)?.settings.arguments as String?;
-  }
-
-  Future<void> verifyOtp(String otp) async {
-    final response = await http.post(
-      Uri.parse('https://devapiv4.dealsdray.com/api/v2/user/otp/verification'),
-      headers: <String, String>{'Content-Type': 'application/json'},
-      body: json.encode({'phone': phoneNumber, 'otp': otp}),
-    );
-
-    if (response.statusCode == 200) {
-      // Navigate to home screen
-      Navigator.pushNamed(context, '/home');
+  void verifyOtp() async {
+    final response = await apiService.verifyOtp("1234567890", otpController.text);
+    if (response['status'] == 'success') {
+      Get.snackbar("Success", "OTP Verified!");
     } else {
-      // Handle error
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Invalid OTP')));
+      Get.snackbar("Error", response['message']);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('OTP Verification')),
-      body: Stack(
+      appBar: AppBar(title: const Text("OTP Verification")),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Online background image
-          Positioned.fill(
-            child: Image.network(
-              'https://your-image-url.com/otp_background.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _otpController,
-                  decoration: InputDecoration(
-                    labelText: 'Enter OTP',
-                    fillColor: Colors.white,
-                    filled: true,
-                  ),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => verifyOtp(_otpController.text),
-                  child: Text('Verify OTP'),
-                ),
-              ],
-            ),
-          ),
+          TextField(controller: otpController, decoration: const InputDecoration(hintText: "Enter OTP")),
+          ElevatedButton(onPressed: verifyOtp, child: const Text("Verify OTP"))
         ],
       ),
     );

@@ -1,62 +1,30 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ApiService {
-  static const String baseUrl = "http://devapiv4.dealsdray.com/api/v2/user/";
+  static const String baseUrl = "https://example.com/api";
 
-  static Future<Map<String, dynamic>?> addDevice(String deviceInfo) async {
+  Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse("${baseUrl}device/add"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"device_info": deviceInfo}),
+      Uri.parse('$baseUrl/login'),
+      body: {'email': email, 'password': password},
     );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      return null;
-    }
+    return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>?> requestOtp(String mobile) async {
+  Future<Map<String, dynamic>> register(String email, String password, String phone) async {
     final response = await http.post(
-      Uri.parse("${baseUrl}otp"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"mobile": mobile}),
+      Uri.parse('$baseUrl/register'),
+      body: {'email': email, 'password': password, 'phone': phone},
     );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      return null;
-    }
+    return jsonDecode(response.body);
   }
 
-  static Future<Map<String, dynamic>?> verifyOtp(String mobile, String otp) async {
+  Future<Map<String, dynamic>> verifyOtp(String phone, String otp) async {
     final response = await http.post(
-      Uri.parse("${baseUrl}otp/verification"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"mobile": mobile, "otp": otp}),
+      Uri.parse('$baseUrl/verify-otp'),
+      body: {'phone': phone, 'otp': otp},
     );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      return null;
-    }
-  }
-
-  static Future<Map<String, dynamic>?> registerUser(String email, String referral) async {
-    final response = await http.post(
-      Uri.parse("${baseUrl}email/referral"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email, "referral": referral}),
-    );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      return null;
-    }
+    return jsonDecode(response.body);
   }
 }

@@ -1,8 +1,8 @@
 android {
-    ...
+    compileSdkVersion 33
     defaultConfig {
-        ...
-        versionCode 1  // Increment this with each release
-        versionName "1.0.0"  // App version (string)
+        applicationId "com.example.ecommerce"
+        minSdkVersion 21
+        targetSdkVersion 33
     }
 }

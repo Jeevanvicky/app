@@ -1,66 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:get/get.dart';
+import '../services/api_service.dart';
+import 'otp.dart';
+import 'register.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController _phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final ApiService apiService = ApiService();
 
-  Future<void> sendOtp(String phone) async {
-    final response = await http.post(
-      Uri.parse('https://devapiv4.dealsdray.com/api/v2/user/otp'),
-      headers: <String, String>{'Content-Type': 'application/json'},
-      body: json.encode({'phone': phone}),
-    );
-
-    if (response.statusCode == 200) {
-      // Navigate to OTP screen
-      Navigator.pushNamed(context, '/otp', arguments: phone);
+  void login() async {
+    final response = await apiService.login(emailController.text, passwordController.text);
+    if (response['status'] == 'success') {
+      Get.to(() => const OtpScreen());
     } else {
-      // Handle error
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to send OTP')));
+      Get.snackbar("Error", response['message']);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Stack(
-        children: [
-          // Online background image
-          Positioned.fill(
-            child: Image.network(
-              'https://your-image-url.com/login_background.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Phone Number',
-                    fillColor: Colors.white,
-                    filled: true,
-                  ),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => sendOtp(_phoneController.text),
-                  child: Text('Send OTP'),
-                ),
-              ],
-            ),
-          ),
-        ],
+      appBar: AppBar(title: const Text("Login")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(controller: emailController, decoration: const InputDecoration(hintText: "Email")),
+            TextField(controller: passwordController, decoration: const InputDecoration(hintText: "Password"), obscureText: true),
+            const SizedBox(height: 10),
+            ElevatedButton(onPressed: login, child: const Text("Login")),
+            TextButton(onPressed: () => Get.to(() => const RegisterScreen()), child: const Text("Register"))
+          ],
+        ),
       ),
     );
   }

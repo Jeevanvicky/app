@@ -1,57 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:get/get.dart';
+import '../services/api_service.dart';
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _referralController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final ApiService apiService = ApiService();
 
-  Future<void> registerUser(String email, String referralCode) async {
-    final response = await http.post(
-      Uri.parse('http://devapiv4.dealsdray.com/api/v2/user/email/referral'),  // Updated API endpoint
-      headers: <String, String>{'Content-Type': 'application/json'},
-      body: json.encode({'email': email, 'referral_code': referralCode}),  // Sending email and referral code
-    );
-
-    if (response.statusCode == 200) {
-      // Registration successful, navigate to Home screen
-      Navigator.pushNamed(context, '/home');
+  void register() async {
+    final response = await apiService.register(emailController.text, passwordController.text, phoneController.text);
+    if (response['status'] == 'success') {
+      Get.to(() => const OtpScreen());
     } else {
-      // Handle error if registration fails
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registration failed')));
+      Get.snackbar("Error", response['message']);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Register')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,  // Email keyboard type
-            ),
-            TextField(
-              controller: _referralController,
-              decoration: InputDecoration(labelText: 'Referral Code'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                registerUser(_emailController.text, _referralController.text);
-              },
-              child: Text('Register'),
-            ),
-          ],
-        ),
+      appBar: AppBar(title: const Text("Register")),
+      body: Column(
+        children: [
+          TextField(controller: emailController, decoration: const InputDecoration(hintText: "Email")),
+          TextField(controller: passwordController, decoration: const InputDecoration(hintText: "Password"), obscureText: true),
+          TextField(controller: phoneController, decoration: const InputDecoration(hintText: "Phone")),
+          ElevatedButton(onPressed: register, child: const Text("Register"))
+        ],
       ),
     );
   }
